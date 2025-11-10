@@ -13,7 +13,9 @@ const TARGET_OPTIONS = [
   { value: 'linkedin', label: 'LinkedIn', color: '#0A66C2', icon: 'in' },
 ] as const;
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:8080/api';
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+  'https://anypostbackend-production.up.railway.app/api';
 const UPLOAD_ENDPOINT = `${API_BASE_URL.replace(/\/$/, '')}/videos/upload`;
 
 type TargetValue = (typeof TARGET_OPTIONS)[number]['value'];
