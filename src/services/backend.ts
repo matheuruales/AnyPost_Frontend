@@ -119,4 +119,12 @@ export const backendApi = {
 
   generateImageFromPrompt: (payload: ImageGenerationRequest) =>
     withJsonData<ImageGenerationResponse>(api.post('/ai/images/generate', payload)),
+
+  downloadGeneratedImage: (imageUrl: string) =>
+    api
+      .get<Blob>('/ai/images/proxy', {
+        params: { imageUrl },
+        responseType: 'blob',
+      })
+      .then((response) => response.data),
 };

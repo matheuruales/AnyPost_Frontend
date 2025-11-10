@@ -276,14 +276,18 @@ const AIDashboard: React.FC = () => {
   };
 
   const downloadImageAsFile = async (url: string) => {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('No se pudo descargar la imagen generada.');
+    const blob = await backendApi.downloadGeneratedImage(url);
+    const mimeType = blob.type || 'image/png';
+    let extension = 'png';
+    if (mimeType.includes('jpeg') || mimeType.includes('jpg')) {
+      extension = 'jpg';
+    } else if (mimeType.includes('webp')) {
+      extension = 'webp';
+    } else if (mimeType.includes('gif')) {
+      extension = 'gif';
     }
-    const blob = await response.blob();
-    const extension = blob.type.includes('png') ? 'png' : blob.type.includes('jpeg') ? 'jpg' : 'webp';
     const fileName = `anypost-ai-${Date.now()}.${extension}`;
-    return new File([blob], fileName, { type: blob.type || 'image/png' });
+    return new File([blob], fileName, { type: mimeType });
   };
 
   const handlePublishImage = async (event: React.FormEvent<HTMLFormElement>) => {
