@@ -67,3 +67,20 @@ export interface VideoJobCreationResponse {
   jobId: number;
   message: string;
 }
+
+export interface ImageGenerationRequest {
+  prompt: string;
+  size?: string;
+  quality?: string;
+  style?: string;
+}
+
+export interface ImageGenerationResponse {
+  prompt: string;
+  revisedPrompt?: string | null;
+  imageUrl: string;
+  size: string;
+  quality: string;
+  style: string;
+  generatedAt?: string | null;
+}

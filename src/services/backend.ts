@@ -12,6 +12,8 @@ import {
   UserProfileResponse,
   VideoJobStatus,
   VideoJobCreationResponse,
+  ImageGenerationRequest,
+  ImageGenerationResponse,
 } from '../types/backend';
 
 export interface VideoUploadPayload {
@@ -114,4 +116,7 @@ export const backendApi = {
   },
 
   getVideoJobStatus: (jobId: number) => withJsonData<VideoJobStatus>(api.get(`/videos/jobs/${jobId}`)),
+
+  generateImageFromPrompt: (payload: ImageGenerationRequest) =>
+    withJsonData<ImageGenerationResponse>(api.post('/ai/images/generate', payload)),
 };
