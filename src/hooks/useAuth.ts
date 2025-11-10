@@ -10,7 +10,7 @@ import {
 import { FirebaseError } from 'firebase/app';
 import { isAxiosError } from 'axios';
 import { auth } from '../services/firebase';
-import api from '../services/api';
+import { backendApi } from '../services/backend';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -92,10 +92,11 @@ export const useAuth = (): AuthContextType => {
       // Store token in localStorage
       localStorage.setItem('token', token);
       
-      // Register user in backend
-      await api.post('/auth/register', {
-        uid: userCredential.user.uid,
-        email: userCredential.user.email
+      // Register the collaborator profile in the Spring backend
+      const profileEmail = userCredential.user.email || sanitizedEmail;
+      await backendApi.createUserProfile({
+        email: profileEmail,
+        displayName: profileEmail.split('@')[0] || 'Creator',
       });
     } catch (error) {
       console.error('Error registering:', error);

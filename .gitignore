@@ -14,13 +14,19 @@ pnpm-debug.log*
 
 # Environment variables
 .env
+.env.local
+.env.development
+.env.production
+.env.test
 .env.*
+.envrc
 !.env.example
 
 # Tooling caches
 .eslintcache
 *.tsbuildinfo
 node_modules/.cache/
+.vite/
 
 # Testing and coverage
 coverage/
