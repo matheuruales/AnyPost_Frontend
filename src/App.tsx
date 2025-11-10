@@ -8,6 +8,8 @@ const Register = React.lazy(() => import('./pages/Register'));
 const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Profile = React.lazy(() => import('./pages/Profile'));
+const CreatorHub = React.lazy(() => import('./pages/CreatorHub'));
+const AIDashboard = React.lazy(() => import('./pages/AIDashboard'));
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser, loading } = useAuth();
@@ -26,7 +28,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <Loader />;
   }
 
-  return !currentUser ? <>{children}</> : <Navigate to="/dashboard" />;
+  return !currentUser ? <>{children}</> : <Navigate to="/creator-hub" />;
 };
 
 const App: React.FC = () => {
@@ -67,6 +69,22 @@ const App: React.FC = () => {
             }
           />
           <Route
+            path="/creator-hub"
+            element={
+              <ProtectedRoute>
+                <CreatorHub />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-dashboard"
+            element={
+              <ProtectedRoute>
+                <AIDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <ProtectedRoute>
@@ -74,8 +92,8 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<Navigate to="/creator-hub" />} />
+          <Route path="*" element={<Navigate to="/creator-hub" />} />
         </Routes>
       </React.Suspense>
     </Router>
