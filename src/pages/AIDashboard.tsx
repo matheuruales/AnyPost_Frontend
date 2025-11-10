@@ -275,19 +275,52 @@ const AIDashboard: React.FC = () => {
     );
   };
 
-  const downloadImageAsFile = async (url: string) => {
-    const blob = await backendApi.downloadGeneratedImage(url);
-    const mimeType = blob.type || 'image/png';
-    let extension = 'png';
+  const guessExtensionFromMime = (mimeType: string) => {
     if (mimeType.includes('jpeg') || mimeType.includes('jpg')) {
-      extension = 'jpg';
-    } else if (mimeType.includes('webp')) {
-      extension = 'webp';
-    } else if (mimeType.includes('gif')) {
-      extension = 'gif';
+      return 'jpg';
     }
-    const fileName = `anypost-ai-${Date.now()}.${extension}`;
-    return new File([blob], fileName, { type: mimeType });
+    if (mimeType.includes('webp')) {
+      return 'webp';
+    }
+    if (mimeType.includes('gif')) {
+      return 'gif';
+    }
+    return 'png';
+  };
+
+  const createUploadFileFromGeneratedImage = async (image: ImageHistoryEntry) => {
+    const blob = await backendApi.downloadGeneratedImage(image.imageUrl);
+    const mimeType = blob.type || 'image/png';
+    const extension = guessExtensionFromMime(mimeType);
+
+    if (!blob.size) {
+      throw new Error('La imagen generada no contiene datos válidos.');
+    }
+
+    return new File([blob], `anypost-ai-${Date.now()}.${extension}`, { type: mimeType });
+  };
+
+  const resetPublishForm = () => {
+    setTitle('');
+    setDescription('');
+    setOwnerId('1');
+    setSelectedTargets(['youtube']);
+  };
+
+  const publishGeneratedImage = async () => {
+    if (!generatedImage) {
+      throw new Error('Genera una imagen antes de publicarla.');
+    }
+
+    const file = await createUploadFileFromGeneratedImage(generatedImage);
+
+    return backendApi.uploadVideoAsset({
+      file,
+      title: title.trim() || 'Imagen generada con IA',
+      description: description.trim(),
+      ownerId: Number(ownerId) || 1,
+      targets: targetsPreview,
+    });
   };
 
   const handlePublishImage = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -307,19 +340,9 @@ const AIDashboard: React.FC = () => {
 
     setIsPublishing(true);
     try {
-      const file = await downloadImageAsFile(generatedImage.imageUrl);
-      const response = await backendApi.uploadVideoAsset({
-        file,
-        title: title.trim() || 'Imagen generada con IA',
-        description: description.trim(),
-        ownerId: Number(ownerId) || 1,
-        targets: targetsPreview,
-      });
+      const response = await publishGeneratedImage();
       setPublishSuccess(response);
-      setTitle('');
-      setDescription('');
-      setOwnerId('1');
-      setSelectedTargets(['youtube']);
+      resetPublishForm();
     } catch (error) {
       console.error('Error al publicar imagen generada', error);
       const message =
