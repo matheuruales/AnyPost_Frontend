@@ -275,29 +275,59 @@ const AIDashboard: React.FC = () => {
     );
   };
 
-  const guessExtensionFromMime = (mimeType: string) => {
-    if (mimeType.includes('jpeg') || mimeType.includes('jpg')) {
-      return 'jpg';
+  const convertBlobToJpeg = async (blob: Blob): Promise<Blob> => {
+    if (blob.type === 'image/jpeg') {
+      return blob;
     }
-    if (mimeType.includes('webp')) {
-      return 'webp';
-    }
-    if (mimeType.includes('gif')) {
-      return 'gif';
-    }
-    return 'png';
+
+    return new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(blob);
+      const image = new Image();
+
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const canvas = document.createElement('canvas');
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const context = canvas.getContext('2d');
+
+        if (!context) {
+          reject(new Error('No se pudo preparar el lienzo para convertir la imagen.'));
+          return;
+        }
+
+        context.drawImage(image, 0, 0);
+        canvas.toBlob(
+          (convertedBlob) => {
+            if (!convertedBlob) {
+              reject(new Error('No se pudo convertir la imagen generada a JPG.'));
+              return;
+            }
+            resolve(convertedBlob);
+          },
+          'image/jpeg',
+          0.92
+        );
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('No se pudo procesar la imagen generada para publicarla.'));
+      };
+
+      image.src = objectUrl;
+    });
   };
 
   const createUploadFileFromGeneratedImage = async (image: ImageHistoryEntry) => {
     const blob = await backendApi.downloadGeneratedImage(image.imageUrl);
-    const mimeType = blob.type || 'image/png';
-    const extension = guessExtensionFromMime(mimeType);
 
     if (!blob.size) {
       throw new Error('La imagen generada no contiene datos válidos.');
     }
 
-    return new File([blob], `anypost-ai-${Date.now()}.${extension}`, { type: mimeType });
+    const jpegBlob = await convertBlobToJpeg(blob);
+    return new File([jpegBlob], `anypost-ai-${Date.now()}.jpg`, { type: 'image/jpeg' });
   };
 
   const resetPublishForm = () => {
