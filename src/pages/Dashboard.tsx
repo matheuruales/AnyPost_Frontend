@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../hooks/useAuth';
 import { backendApi } from '../services/backend';
+import { API_BASE_URL as RAW_API_BASE_URL } from '../services/api';
 import Loader from '../components/ui/Loader';
 
 const TARGET_OPTIONS = [
@@ -67,10 +68,8 @@ const TARGET_OPTIONS = [
   },
 ] as const;
 
-const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
-  'https://backendanypost-production.up.railway.app/api';
-const UPLOAD_ENDPOINT = `${API_BASE_URL.replace(/\/$/, '')}/videos/upload`;
+const NORMALIZED_API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, '');
+const UPLOAD_ENDPOINT = `${NORMALIZED_API_BASE_URL}/videos/upload`;
 
 type TargetValue = (typeof TARGET_OPTIONS)[number]['value'];
 type FileType = 'video' | 'image';
